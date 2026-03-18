@@ -92,3 +92,10 @@ db/
 apps/db/
 apps/tauri/db/
 tasks
+
+# YIYI Capital
+compose.yiyi.yml
+
+# Antigravity IDE
+.gemini/
+
