@@ -94,7 +94,6 @@ export function RegimeTab({ baseUrl, onOpenSettings }: RegimeTabProps) {
         consecutiveSuccesses={
           health.data?.runtime_stats?.consecutive_successes ?? 0
         }
-        sourceUrl={baseUrl}
       />
     </div>
   );

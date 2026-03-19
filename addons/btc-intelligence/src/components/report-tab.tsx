@@ -160,16 +160,23 @@ export function ReportTab({ baseUrl, onOpenSettings }: ReportTabProps) {
       {/* Journal highlights */}
       {data.journal_highlights.length > 0 && (
         <Section title="Journal Highlights">
-          {data.journal_highlights.map((h, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-2 py-1 text-xs"
-            >
-              <StatusBadge status={h.severity} />
-              <span className="text-zinc-300">{h.detail}</span>
-              <span className="ml-auto text-zinc-500">{h.as_of}</span>
-            </div>
-          ))}
+          {data.journal_highlights.map((h, i) => {
+            const displayText =
+              h.detail ||
+              `${h.layer}.${h.metric} — ${h.type.replace(/_/g, " ")}`;
+            return (
+              <div
+                key={i}
+                className="flex items-center gap-2 py-1 text-xs"
+              >
+                <StatusBadge status={h.severity} />
+                <span className="text-zinc-300">{displayText}</span>
+                <span className="ml-auto shrink-0 text-zinc-500">
+                  {h.as_of}
+                </span>
+              </div>
+            );
+          })}
         </Section>
       )}
 

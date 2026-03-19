@@ -10,6 +10,12 @@ import { ReportTab } from "../components/report-tab";
 
 type TabId = "regime" | "reliability" | "report";
 
+const TABS: { id: TabId; label: string }[] = [
+  { id: "regime", label: "Regime" },
+  { id: "reliability", label: "Reliability" },
+  { id: "report", label: "Report" },
+];
+
 export default function BtcIntelligencePage({
   ctx,
 }: {
@@ -19,23 +25,22 @@ export default function BtcIntelligencePage({
   const [activeTab, setActiveTab] = useState<TabId>("regime");
   const [showSettings, setShowSettings] = useState(false);
 
-  const tabs: { id: TabId; label: string }[] = [
-    { id: "regime", label: "Regime" },
-    { id: "reliability", label: "Reliability" },
-    { id: "report", label: "Report" },
-  ];
-
   return (
     <Page>
-      <PageHeader title="BTC Intelligence">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setShowSettings(true)}
-        >
-          ⚙️
-        </Button>
-      </PageHeader>
+      <PageHeader
+        heading="BTC Intelligence"
+        text="Observability dashboard"
+        actions={
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowSettings(true)}
+            title="Settings"
+          >
+            ⚙️
+          </Button>
+        }
+      />
       <PageContent>
         <ConnectionGuard
           url={url}
@@ -44,18 +49,21 @@ export default function BtcIntelligencePage({
           saveUrl={saveUrl}
         >
           {/* Tab bar */}
-          <div className="flex gap-1 border-b border-zinc-800 mb-4">
-            {tabs.map((tab) => (
+          <div className="mb-6 flex gap-1 border-b border-zinc-800">
+            {TABS.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 text-sm font-medium transition-colors ${
+                className={`relative px-4 py-2.5 text-sm font-medium transition-colors ${
                   activeTab === tab.id
-                    ? "text-zinc-100 border-b-2 border-zinc-100"
+                    ? "text-zinc-100"
                     : "text-zinc-500 hover:text-zinc-300"
                 }`}
               >
                 {tab.label}
+                {activeTab === tab.id && (
+                  <span className="absolute inset-x-1 -bottom-px h-0.5 rounded-full bg-zinc-100" />
+                )}
               </button>
             ))}
           </div>
@@ -84,3 +92,4 @@ export default function BtcIntelligencePage({
     </Page>
   );
 }
+
