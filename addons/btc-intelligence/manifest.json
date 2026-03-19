@@ -1,0 +1,22 @@
+{
+  "id": "btc-intelligence-addon",
+  "name": "BTC Intelligence",
+  "version": "1.0.0",
+  "description": "BTC observability data from YIYI FastAPI backend — regime status, synthesis, reliability, reports",
+  "author": "YIYI Capital",
+  "main": "dist/addon.js",
+  "sdkVersion": "3.0.0",
+  "enabled": true,
+  "permissions": [
+    {
+      "category": "secrets",
+      "functions": ["get", "set", "delete"],
+      "purpose": "Store and retrieve FastAPI backend URL configuration"
+    },
+    {
+      "category": "ui",
+      "functions": ["sidebar.addItem", "router.add"],
+      "purpose": "Add sidebar navigation and register addon route"
+    }
+  ]
+}
