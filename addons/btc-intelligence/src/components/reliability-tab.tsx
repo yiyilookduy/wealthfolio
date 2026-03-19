@@ -7,28 +7,51 @@ import type { RunEntry } from "../lib/types";
 
 interface ReliabilityTabProps {
   baseUrl: string;
+  onOpenSettings?: () => void;
 }
 
-export function ReliabilityTab({ baseUrl }: ReliabilityTabProps) {
+export function ReliabilityTab({ baseUrl, onOpenSettings }: ReliabilityTabProps) {
   const rel = useReliability(baseUrl);
   const runs = useRuns(baseUrl);
 
   if (rel.isLoading) {
     return (
-      <div className="py-10 text-center text-zinc-500">Loading...</div>
+      <div className="space-y-4">
+        <div className="h-32 animate-pulse rounded-xl border border-zinc-800 bg-zinc-900/50" />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-28 animate-pulse rounded-lg border border-zinc-800 bg-zinc-900/50" />
+          ))}
+        </div>
+        <div className="h-16 animate-pulse rounded-lg border border-zinc-800 bg-zinc-900/50" />
+      </div>
     );
   }
 
   if (rel.error) {
     return (
-      <div className="py-10 text-center text-red-400">
-        {rel.error.message}
-        <button
-          onClick={() => rel.refetch()}
-          className="ml-2 underline"
-        >
-          Retry
-        </button>
+      <div className="mx-auto max-w-md py-10">
+        <div className="rounded-lg border border-red-900/50 bg-red-950/20 p-6 text-center">
+          <p className="text-2xl">⚠️</p>
+          <p className="mt-2 text-sm font-medium text-red-400">Failed to load reliability data</p>
+          <p className="mt-1 text-xs text-zinc-500">{rel.error.message}</p>
+          <div className="mt-4 flex justify-center gap-2">
+            <button
+              onClick={() => rel.refetch()}
+              className="rounded-md border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-800 transition-colors"
+            >
+              Retry
+            </button>
+            {onOpenSettings && (
+              <button
+                onClick={onOpenSettings}
+                className="rounded-md border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-800 transition-colors"
+              >
+                Check Settings
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     );
   }

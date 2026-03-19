@@ -60,15 +60,15 @@ export default function BtcIntelligencePage({
             ))}
           </div>
 
-          {/* Tab content — placeholder until Tasks 5-7 */}
+          {/* Tab content */}
           {activeTab === "regime" && url && (
-            <RegimeTab baseUrl={url} />
+            <RegimeTab baseUrl={url} onOpenSettings={() => setShowSettings(true)} />
           )}
           {activeTab === "reliability" && url && (
-            <ReliabilityTab baseUrl={url} />
+            <ReliabilityTab baseUrl={url} onOpenSettings={() => setShowSettings(true)} />
           )}
           {activeTab === "report" && url && (
-            <ReportTab baseUrl={url} />
+            <ReportTab baseUrl={url} onOpenSettings={() => setShowSettings(true)} />
           )}
         </ConnectionGuard>
 

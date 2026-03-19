@@ -6,34 +6,63 @@ import type { ConfidenceLevel } from "../lib/types";
 
 interface ReportTabProps {
   baseUrl: string;
+  onOpenSettings?: () => void;
 }
 
-export function ReportTab({ baseUrl }: ReportTabProps) {
+function isStale(dateStr: string | undefined | null, hoursThreshold = 24): boolean {
+  if (!dateStr) return false;
+  try {
+    const ts = new Date(dateStr).getTime();
+    return Date.now() - ts > hoursThreshold * 60 * 60 * 1000;
+  } catch {
+    return false;
+  }
+}
+
+export function ReportTab({ baseUrl, onOpenSettings }: ReportTabProps) {
   const { data, isLoading, error, refetch } = useReport(baseUrl);
 
   if (isLoading) {
     return (
-      <div className="py-10 text-center text-zinc-500">
-        Loading report...
+      <div className="space-y-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-24 animate-pulse rounded-lg border border-zinc-800 bg-zinc-900/50" />
+        ))}
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="py-10 text-center text-red-400">
-        {error.message}
-        <button
-          onClick={() => refetch()}
-          className="ml-2 underline"
-        >
-          Retry
-        </button>
+      <div className="mx-auto max-w-md py-10">
+        <div className="rounded-lg border border-red-900/50 bg-red-950/20 p-6 text-center">
+          <p className="text-2xl">⚠️</p>
+          <p className="mt-2 text-sm font-medium text-red-400">Failed to load report</p>
+          <p className="mt-1 text-xs text-zinc-500">{error.message}</p>
+          <div className="mt-4 flex justify-center gap-2">
+            <button
+              onClick={() => refetch()}
+              className="rounded-md border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-800 transition-colors"
+            >
+              Retry
+            </button>
+            {onOpenSettings && (
+              <button
+                onClick={onOpenSettings}
+                className="rounded-md border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-800 transition-colors"
+              >
+                Check Settings
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!data) return null;
+
+  const reportIsStale = isStale(data.as_of);
 
   return (
     <div className="space-y-6">
@@ -157,6 +186,9 @@ export function ReportTab({ baseUrl }: ReportTabProps) {
 
       <p className="text-[10px] text-zinc-600">
         Report v{data.report_version} · as of {data.as_of}
+        {reportIsStale && (
+          <span className="ml-2 rounded bg-yellow-500/20 px-1.5 py-0.5 text-yellow-400">⚠ Data may be stale</span>
+        )}
       </p>
     </div>
   );

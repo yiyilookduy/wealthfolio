@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import type { BtcSnapshot } from "../lib/types";
 import { StatusBadge } from "./status-badge";
 
@@ -17,6 +18,15 @@ export function RegimeHero({ snapshot }: RegimeHeroProps) {
   const directive = snapshot.directive;
   const gradient =
     REGIME_GRADIENTS[regime.name] ?? "from-zinc-900/30 to-zinc-950/10";
+
+  const isStale = useMemo(() => {
+    try {
+      const ts = new Date(snapshot.meta.generated_at).getTime();
+      return Date.now() - ts > 24 * 60 * 60 * 1000;
+    } catch {
+      return false;
+    }
+  }, [snapshot.meta.generated_at]);
 
   return (
     <div
@@ -62,6 +72,9 @@ export function RegimeHero({ snapshot }: RegimeHeroProps) {
       <p className="mt-3 text-[10px] text-zinc-500">
         Updated: {snapshot.meta.generated_at} · Bar confirmed:{" "}
         {snapshot.meta.bar_confirmed ? "Yes" : "No"}
+        {isStale && (
+          <span className="ml-2 rounded bg-yellow-500/20 px-1.5 py-0.5 text-yellow-400">⚠ Data may be stale</span>
+        )}
       </p>
     </div>
   );
