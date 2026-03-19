@@ -95,6 +95,8 @@ tasks
 
 # YIYI Capital
 compose.yiyi.yml
+*.zip
+.superpowers/
 
 # Antigravity IDE
 .gemini/
