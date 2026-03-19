@@ -7,73 +7,64 @@ const DOT_COLORS: Record<string, string> = {
   unknown: "bg-zinc-500",
 };
 
+const ACCENT_BORDERS: Record<string, string> = {
+  green: "border-t-emerald-500/40",
+  yellow: "border-t-yellow-500/40",
+  red: "border-t-red-500/40",
+  unknown: "border-t-zinc-600/40",
+};
+
 interface SystemCardProps {
   name: string;
   status: TrafficLight;
   details: Record<string, unknown>;
 }
 
-/**
- * Render a value smartly — handles nested objects, arrays, primitives.
- * Returns a human-readable string, never "[object Object]".
- */
+/** Smart value rendering — handles nested objects, arrays, primitives */
 function renderValue(v: unknown): string {
   if (v === null || v === undefined) return "—";
   if (typeof v === "boolean") return v ? "✓" : "✗";
   if (typeof v === "number") return String(v);
   if (typeof v === "string") return v;
 
-  // Array of objects → count summary
   if (Array.isArray(v)) {
     if (v.length === 0) return "none";
-    // If items have a "name" field (e.g. cron jobs), list names
     if (typeof v[0] === "object" && v[0] !== null && "name" in v[0]) {
       return v.map((item) => (item as { name: string }).name).join(", ");
     }
     return `${v.length} items`;
   }
 
-  // Nested object — extract "status" or "message" if exists
   if (typeof v === "object") {
     const obj = v as Record<string, unknown>;
-    if ("status" in obj && typeof obj.status === "string") {
-      return obj.status;
-    }
+    if ("status" in obj && typeof obj.status === "string") return obj.status;
     if ("message" in obj && typeof obj.message === "string") {
       const msg = obj.message;
-      return msg.length > 60 ? msg.slice(0, 57) + "…" : msg;
+      return msg.length > 50 ? msg.slice(0, 47) + "…" : msg;
     }
-    // Fallback: count keys
     return `${Object.keys(obj).length} fields`;
   }
 
   return String(v);
 }
 
-/**
- * Flatten nested detail objects one level deep for display.
- * E.g. model_health_checks: { zscore_compression: { status: "warning" } }
- * → show "zscore_compression": "warning" instead of [object Object]
- */
+/** Flatten nested details one level */
 function flattenDetails(details: Record<string, unknown>): [string, string][] {
   const result: [string, string][] = [];
 
   for (const [key, value] of Object.entries(details)) {
-    // Skip empty arrays
     if (Array.isArray(value) && value.length === 0) continue;
 
-    // If value is a dict of sub-checks (like model_health_checks), expand
     if (
       typeof value === "object" &&
       value !== null &&
       !Array.isArray(value) &&
       Object.values(value as Record<string, unknown>).every(
-        (sub) => typeof sub === "object" && sub !== null
+        (sub) => typeof sub === "object" && sub !== null,
       )
     ) {
-      // Nested dict of dicts → extract status from each
       for (const [subKey, subVal] of Object.entries(
-        value as Record<string, unknown>
+        value as Record<string, unknown>,
       )) {
         result.push([subKey, renderValue(subVal)]);
       }
@@ -82,20 +73,32 @@ function flattenDetails(details: Record<string, unknown>): [string, string][] {
     }
   }
 
-  return result.slice(0, 6); // cap at 6 rows
+  return result.slice(0, 6);
+}
+
+/** Status-aware value color */
+function valueColor(v: string): string {
+  const lower = v.toLowerCase();
+  if (lower === "ok" || lower === "healthy" || lower === "✓") return "text-emerald-400";
+  if (lower === "warning" || lower === "degraded") return "text-yellow-400";
+  if (lower === "error" || lower === "critical" || lower === "✗") return "text-red-400";
+  return "text-zinc-300";
 }
 
 export function SystemCard({ name, status, details }: SystemCardProps) {
   const rows = flattenDetails(details);
+  const accentBorder = ACCENT_BORDERS[status] ?? ACCENT_BORDERS.unknown;
 
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
+    <div
+      className={`rounded-lg border border-zinc-800 border-t-2 ${accentBorder} bg-zinc-900/50 p-4 transition-colors hover:border-zinc-700`}
+    >
       <div className="mb-3 flex items-center gap-2">
         <div
-          className={`h-3 w-3 rounded-full ${DOT_COLORS[status] ?? DOT_COLORS.unknown}`}
+          className={`h-2.5 w-2.5 rounded-full ${DOT_COLORS[status] ?? DOT_COLORS.unknown} ring-2 ring-zinc-800`}
         />
-        <h4 className="text-sm font-medium text-zinc-200">{name}</h4>
-        <span className="ml-auto text-xs uppercase text-zinc-500">
+        <h4 className="text-sm font-semibold text-zinc-200">{name}</h4>
+        <span className="ml-auto text-[10px] font-bold uppercase text-zinc-500">
           {status}
         </span>
       </div>
@@ -105,7 +108,7 @@ export function SystemCard({ name, status, details }: SystemCardProps) {
             <dt className="shrink-0 text-zinc-500">
               {k.replace(/_/g, " ")}
             </dt>
-            <dd className="truncate font-mono text-zinc-300" title={v}>
+            <dd className={`truncate font-mono ${valueColor(v)}`} title={v}>
               {v}
             </dd>
           </div>
