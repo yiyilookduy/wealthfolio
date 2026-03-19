@@ -1,11 +1,7 @@
 import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
 import { type AddonContext } from "@wealthfolio/addon-sdk";
 import React from "react";
-
-// Lazy-load the main page
-const BtcIntelligencePage = React.lazy(
-  () => import("./pages/btc-intelligence-page"),
-);
+import BtcIntelligencePage from "./pages/btc-intelligence-page";
 
 export default function enable(ctx: AddonContext) {
   ctx.api.logger.info("₿ BTC Intelligence addon is being enabled");
@@ -33,7 +29,7 @@ export default function enable(ctx: AddonContext) {
       );
     };
 
-    // Register route
+    // Register route — wrap in lazy for React Router compatibility
     ctx.router.add({
       path: "/addon/btc-intelligence",
       component: React.lazy(() =>
@@ -62,3 +58,4 @@ export default function enable(ctx: AddonContext) {
     });
   });
 }
+
